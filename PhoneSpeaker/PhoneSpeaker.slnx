@@ -1,0 +1,11 @@
+<Solution>
+  <Project Path="PhoneSpeaker.Android/PhoneSpeaker.Android.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="PhoneSpeaker.Browser/PhoneSpeaker.Browser.csproj" />
+  <Project Path="PhoneSpeaker.Desktop/PhoneSpeaker.Desktop.csproj" />
+  <Project Path="PhoneSpeaker.iOS/PhoneSpeaker.iOS.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="PhoneSpeaker/PhoneSpeaker.csproj" />
+</Solution>

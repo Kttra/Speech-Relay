@@ -1,0 +1,51 @@
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Markup.Xaml;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using PcSpeakerApp.ViewModels;
+using PcSpeakerApp.Views;
+using System;
+
+namespace PcSpeakerApp;
+
+public partial class App : Application
+{
+    public static IServiceProvider? Services { get; private set; }
+
+    public override void Initialize()
+    {
+        AvaloniaXamlLoader.Load(this);
+    }
+
+    public override void OnFrameworkInitializationCompleted()
+    {
+        // 1. Load configuration
+        var config = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: false)
+            .Build();
+
+        // 2. Register services
+        var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(config);
+        services.AddSingleton<IWebServer, WebServer>();
+        services.AddSingleton<MainWindowViewModel>();
+
+        Services = services.BuildServiceProvider();
+
+        // 3. Resolve ViewModel + WebServer
+        var vm = Services.GetRequiredService<MainWindowViewModel>();
+        var server = Services.GetRequiredService<IWebServer>();
+        server.Start();
+
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            desktop.MainWindow = new MainWindow
+            {
+                DataContext = vm
+            };
+        }
+
+        base.OnFrameworkInitializationCompleted();
+    }
+}
