@@ -1,5 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Linq;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 
 namespace PcSpeakerApp.ViewModels
 {
@@ -7,6 +10,9 @@ namespace PcSpeakerApp.ViewModels
     {
         [ObservableProperty]
         private string lastText = "Waiting for text...";
+
+        [ObservableProperty]
+        private string listeningIp = "";
 
         [ObservableProperty]
         private string inputText = "";
@@ -18,6 +24,8 @@ namespace PcSpeakerApp.ViewModels
         {
             _webServer = webServer;
 
+            ListeningIp = GetWifiIp();
+
             _webServer.TextReceived += text =>
             {
                 LastText = text;
@@ -26,8 +34,7 @@ namespace PcSpeakerApp.ViewModels
             SubmitCommand = new RelayCommand(async () =>
             {
                 LastText = InputText;
-                var audio = await _webServer.PiperSpeakAsync(InputText);
-                _webServer.PlayAudio(audio);
+                var audio = await _webServer.ProcessVoice(InputText, "", WebServer.AudioGenerator.WindowsNarrator);
                 InputText = "";
             });
         }
@@ -35,6 +42,22 @@ namespace PcSpeakerApp.ViewModels
         public void UpdateText(string text)
         {
             LastText = text;
+        }
+
+        private static string GetWifiIp()
+        {
+            var wifi = NetworkInterface.GetAllNetworkInterfaces()
+                .FirstOrDefault(n => n.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 && n.OperationalStatus == OperationalStatus.Up);
+
+            if (wifi == null)
+            {
+                return "127.0.0.1";
+            }
+
+            return wifi.GetIPProperties()
+                .UnicastAddresses
+                .FirstOrDefault(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
+                ?.Address.ToString() ?? "127.0.0.1";
         }
     }
 }
