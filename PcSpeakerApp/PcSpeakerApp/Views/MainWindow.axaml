@@ -16,10 +16,13 @@
     </Design.DataContext>
 
     <StackPanel Margin="20">
+        <TextBlock Text="Listening on Ip Address:" FontSize="24"/>
+		<TextBlock Text="{Binding ListeningIp}" FontSize="18" Margin="0,0,0,20"/>
+		
         <TextBlock Text="Last received text:" FontSize="24"/>
-        <TextBlock Text="{Binding LastText}" FontSize="18" Margin="0,10,0,0"/>
+        <TextBlock Text="{Binding LastText}" FontSize="18" Margin="0,0,0,20"/>
 
-        <StackPanel Margin="0,30,0,10">
+        <StackPanel Margin="0,10,0,0">
             <TextBox Width="250"
                      HorizontalAlignment="Left"
                      Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}"

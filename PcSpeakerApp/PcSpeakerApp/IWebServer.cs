@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
+using static PcSpeakerApp.WebServer;
 
 namespace PcSpeakerApp;
 
 public interface IWebServer
 {
     event Action<string> TextReceived;
-    Task<byte[]> PiperSpeakAsync(string text);
-    void PlayAudio(byte[] audio);
+    Task<bool> ProcessVoice(string text, string voice, AudioGenerator audioGenerator);
     void Start();
 }

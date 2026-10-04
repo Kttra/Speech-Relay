@@ -2,22 +2,24 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Windows.Media.Core;
 using Windows.Media.Playback;
+using Windows.Media.SpeechSynthesis;
+using Windows.Storage.Streams;
+using AzureSpeech = Microsoft.CognitiveServices.Speech;
 
 namespace PcSpeakerApp;
 
 public class WebServer : IWebServer
 {
-    //private readonly MainWindowViewModel _vm;
     public event Action<string>? TextReceived;
     private readonly IConfiguration _config;
 
     public WebServer(IConfiguration config)
     {
-        //_vm = vm;
         _config = config;
     }
 
@@ -49,8 +51,9 @@ public class WebServer : IWebServer
                 return;
             }
 
-            string text = "";
-            string voice = "en-US-OnyxTurboMultilingualNeural";
+            var text = "";
+            var voice = "en-US-OnyxTurboMultilingualNeural";
+            var generator = AudioGenerator.WindowsNarrator;
 
             if (ctx.Request.HttpMethod == "POST")
             {
@@ -61,6 +64,7 @@ public class WebServer : IWebServer
                 var parsed = System.Web.HttpUtility.ParseQueryString(body);
                 text = parsed["text"] ?? "";
                 voice = parsed["voice"] ?? voice;
+                generator = ParseAudioGenerator(parsed["generator"] ?? "");
             }
             else
             {
@@ -71,11 +75,7 @@ public class WebServer : IWebServer
 
             if (!string.IsNullOrWhiteSpace(text))
             {
-                Avalonia.Threading.Dispatcher.UIThread.Post(async () =>
-                {
-                    var tt = await PiperSpeakAsync(text);
-                    PlayAudio(tt);
-                });
+                await ProcessVoice(text, voice, generator);
                 Write(ctx, $"Received: {text}");
             }
             else
@@ -90,6 +90,45 @@ public class WebServer : IWebServer
         }
     }
 
+    public async Task<bool> ProcessVoice(string text, string voice, AudioGenerator audioGenerator)
+    {
+        byte[] audio = null;
+        switch (audioGenerator)
+        {
+            case AudioGenerator.Piper:
+                audio = await PiperSpeakAsync(text);
+                break;
+            case AudioGenerator.AzureSpeech:
+                audio = await AzureSpeakAsync(text, voice);
+                break;
+            case AudioGenerator.WindowsNarrator:
+            default:
+                audio = await Win11SpeakAsync(text, voice);
+                break;
+        }
+
+        if (audio == null)
+        {
+            return false;
+        }
+
+        Avalonia.Threading.Dispatcher.UIThread.Post(async () =>
+        {
+            PlayAudio(audio);
+        });
+        return true;
+    }
+
+    private AudioGenerator ParseAudioGenerator(string generatorStr)
+    {
+        if (Enum.TryParse<AudioGenerator>(generatorStr, true, out var value))
+        {
+            return value;
+        }
+
+        return AudioGenerator.WindowsNarrator;
+    }
+
     private void Write(HttpListenerContext ctx, string msg)
     {
         using var writer = new StreamWriter(ctx.Response.OutputStream);
@@ -98,10 +137,10 @@ public class WebServer : IWebServer
 
     //https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/CLI.md
     //voices: https://rhasspy.github.io/piper-samples/#en_US-joe-medium
-    public async Task<byte[]> PiperSpeakAsync(string text)
+    public async Task<byte[]> PiperSpeakAsync(string text, string voice = "en_US-joe-medium.onnx")
     {
         //python -m piper.download_voices en_US-joe-medium --download-dir "%USERPROFILE%\PiperModels"
-        var modelPath = @"C:\Users\Kevin\PiperModels\en_US-joe-medium.onnx";
+        var modelPath = @$"C:\Users\Kevin\PiperModels\{voice}";
         var outputPath = Path.GetTempFileName() + ".wav";
 
         var psi = new ProcessStartInfo
@@ -116,60 +155,68 @@ public class WebServer : IWebServer
         using var process = Process.Start(psi);
         await process.StandardInput.WriteLineAsync(text);
         process.StandardInput.Close();
-
         await process.WaitForExitAsync();
 
-        var bytes = File.ReadAllBytes(outputPath);
-        File.Delete(outputPath);
-        return bytes;
+        if (File.Exists(outputPath))
+        {
+            var bytes = File.ReadAllBytes(outputPath);
+            File.Delete(outputPath);
+            return bytes;
+        }
+        return null;
     }
 
     //Using window narrator for TTS, but it has very limited voice options and quality isn't great
-    //public async Task<byte[]> Win11SpeakAsync(string text, string voiceName)
-    //{
-    //    var synth = new SpeechSynthesizer();
+    public async Task<byte[]> Win11SpeakAsync(string text, string voiceName)
+    {
+        var synth = new SpeechSynthesizer();
 
-    //    var voice = SpeechSynthesizer.AllVoices.FirstOrDefault(v => v.DisplayName.Contains(voiceName)) ?? SpeechSynthesizer.AllVoices.First();
-    //    if (voice != null)
-    //    {
-    //        synth.Voice = voice;
-    //    }
+        var voice = SpeechSynthesizer.AllVoices.FirstOrDefault(v => v.DisplayName.Contains(voiceName)) ?? SpeechSynthesizer.AllVoices.First();
+        if (voice != null)
+        {
+            synth.Voice = voice;
+        }
 
-    //    SpeechSynthesisStream stream = await synth.SynthesizeTextToStreamAsync(text);
+        SpeechSynthesisStream stream = await synth.SynthesizeTextToStreamAsync(text);
+        using var reader = new DataReader(stream);
+        byte[] buffer = new byte[stream.Size];
+        await reader.LoadAsync((uint)stream.Size);
+        reader.ReadBytes(buffer);
 
-    //    using var reader = new DataReader(stream);
-    //    byte[] buffer = new byte[stream.Size];
-    //    await reader.LoadAsync((uint)stream.Size);
-    //    reader.ReadBytes(buffer);
-
-    //    return buffer;
-    //}
+        return buffer;
+    }
 
     //Azure TTS has great voice options and quality, but requires an Azure account and is paid after free tier
     //Get voice from https://speech.microsoft.com/portal/voicegallery
-    //public async Task<byte[]> AzureSpeakAsync(string text, string voice)
-    //{
-    //    var key = _config["AzureSpeech:Key"];
-    //    var region = _config["AzureSpeech:Region"];
-    //    var speechConfig = SpeechConfig.FromSubscription(key, region);
-    //    speechConfig.SpeechSynthesisVoiceName = voice;
+    public async Task<byte[]> AzureSpeakAsync(string text, string voice)
+    {
+        var key = _config["AzureSpeech:Key"];
+        var region = _config["AzureSpeech:Region"];
 
-    //    using var synthesizer = new SpeechSynthesizer(speechConfig, null);
+        var speechConfig = AzureSpeech.SpeechConfig.FromSubscription(key, region);
+        speechConfig.SpeechSynthesisVoiceName = voice;
 
-    //    var result = await synthesizer.SpeakTextAsync(text);
+        using var synthesizer = new AzureSpeech.SpeechSynthesizer(speechConfig, null);
 
-    //    if (result.Reason != ResultReason.SynthesizingAudioCompleted)
-    //    {
-    //        throw new Exception("Azure TTS failed: " + result.Reason);
-    //    }
+        var result = await synthesizer.SpeakTextAsync(text);
 
-    //    return result.AudioData;
-    //}
+        if (result.Reason != AzureSpeech.ResultReason.SynthesizingAudioCompleted)
+        {
+            throw new Exception("Azure TTS failed: " + result.Reason);
+        }
+
+        return result.AudioData;
+    }
 
     public void PlayAudio(byte[] audio)
     {
+        if (audio == null)
+        {
+            return;
+        }
+
         var stream = new MemoryStream(audio);
-        var random = new Windows.Storage.Streams.InMemoryRandomAccessStream();
+        var random = new InMemoryRandomAccessStream();
         var output = random.AsStreamForWrite();
         stream.CopyTo(output);
         output.Flush();
@@ -178,5 +225,12 @@ public class WebServer : IWebServer
         var player = new MediaPlayer();
         player.Source = MediaSource.CreateFromStream(random, "audio/wav");
         player.Play();
+    }
+
+    public enum AudioGenerator
+    {
+        WindowsNarrator = 0,
+        AzureSpeech = 1,
+        Piper = 2
     }
 }
