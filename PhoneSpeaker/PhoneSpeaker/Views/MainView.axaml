@@ -37,17 +37,28 @@
                             MinHeight="40"/>
             </StackPanel>
 
-            <StackPanel Spacing="5">
-                <TextBlock Text="Voice Selection" FontSize="16" FontWeight="Bold"/>
-                <ComboBox MinHeight="40"
-                          HorizontalAlignment="Stretch"
-                          SelectedIndex="0"
-                          SelectedItem="{Binding SelectedVoice}">
-                    <x:String>Onyx Turbo Multilingual</x:String>
-                    <x:String>Phoebe Dragon</x:String>
-                    <x:String>Serena Dragon HD Latest</x:String>
-                </ComboBox>
-            </StackPanel>
+			<StackPanel Spacing="5">
+				<TextBlock Text="Voice Generator" FontSize="16" FontWeight="Bold"/>
+				<ComboBox MinHeight="40"
+                            HorizontalAlignment="Stretch"
+                            SelectedIndex="0"
+                            SelectedItem="{Binding SelectedVoiceGenerator}">
+					<x:String>Windows Narrator</x:String>
+					<x:String>Azure Speech</x:String>
+					<x:String>Piper</x:String>
+				</ComboBox>
+			</StackPanel>
+			
+			<StackPanel Spacing="5">
+				<TextBlock Text="Voice Selection"
+						   FontSize="16"
+						   FontWeight="Bold"/>
+
+				<ComboBox MinHeight="40"
+						  HorizontalAlignment="Stretch"
+						  ItemsSource="{Binding AvailableVoices}"
+						  SelectedItem="{Binding SelectedVoice}" />
+			</StackPanel>
 
             <StackPanel Spacing="5">
                 <TextBlock Text="Preset Message" FontSize="16" FontWeight="Bold"/>

@@ -49,6 +49,9 @@ namespace PhoneSpeaker
                 return client;
             });
 
+            // Register services
+            services.AddSingleton<Services.SettingsService>();
+
             // Register ViewModels
             services.AddTransient<MainViewModel>();
             Services = services.BuildServiceProvider();

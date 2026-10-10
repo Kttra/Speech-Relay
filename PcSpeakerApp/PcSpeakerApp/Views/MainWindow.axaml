@@ -22,6 +22,16 @@
         <TextBlock Text="Last received text:" FontSize="24"/>
         <TextBlock Text="{Binding LastText}" FontSize="18" Margin="0,0,0,20"/>
 
+		<StackPanel Spacing="5">
+			<ComboBox Width="250"
+					  HorizontalAlignment="Left"
+					  SelectedItem="{Binding SelectedVoiceGenerator}">
+				<x:String>WindowsNarrator</x:String>
+				<x:String>Piper</x:String>
+				<x:String>AzureSpeech</x:String>
+			</ComboBox>
+		</StackPanel>
+		
         <StackPanel Margin="0,10,0,0">
             <TextBox Width="250"
                      HorizontalAlignment="Left"

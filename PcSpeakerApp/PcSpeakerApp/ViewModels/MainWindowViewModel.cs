@@ -1,8 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using static PcSpeakerApp.WebServer;
 
 namespace PcSpeakerApp.ViewModels
 {
@@ -16,6 +18,9 @@ namespace PcSpeakerApp.ViewModels
 
         [ObservableProperty]
         private string inputText = "";
+
+        [ObservableProperty]
+        private string selectedVoiceGenerator = "WindowsNarrator";
 
         public IRelayCommand SubmitCommand { get; }
         private readonly IWebServer _webServer;
@@ -34,7 +39,7 @@ namespace PcSpeakerApp.ViewModels
             SubmitCommand = new RelayCommand(async () =>
             {
                 LastText = InputText;
-                var audio = await _webServer.ProcessVoice(InputText, "", WebServer.AudioGenerator.WindowsNarrator);
+                var audio = await _webServer.ProcessVoice(InputText, "", GetDefaultAudioGenerator());
                 InputText = "";
             });
         }
@@ -58,6 +63,16 @@ namespace PcSpeakerApp.ViewModels
                 .UnicastAddresses
                 .FirstOrDefault(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
                 ?.Address.ToString() ?? "127.0.0.1";
+        }
+
+        private AudioGenerator GetDefaultAudioGenerator()
+        {
+            if (Enum.TryParse<AudioGenerator>(SelectedVoiceGenerator ?? "", true, out var value))
+            {
+                return value;
+            }
+
+            return AudioGenerator.WindowsNarrator;
         }
     }
 }

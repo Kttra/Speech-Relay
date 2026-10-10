@@ -140,7 +140,11 @@ public class WebServer : IWebServer
     public async Task<byte[]> PiperSpeakAsync(string text, string voice = "en_US-joe-medium.onnx")
     {
         //python -m piper.download_voices en_US-joe-medium --download-dir "%USERPROFILE%\PiperModels"
-        var modelPath = @$"C:\Users\Kevin\PiperModels\{voice}";
+        var modelPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "PiperModels",
+            voice
+        );
         var outputPath = Path.GetTempFileName() + ".wav";
 
         var psi = new ProcessStartInfo
