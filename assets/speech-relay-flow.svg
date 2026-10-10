@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="850" viewBox="0 0 900 850">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0 0 L8 3 L0 6 Z" fill="#64748b"/></marker></defs>
+<rect width="900" height="850" fill="#0f172a"/>
+<text x="450" y="48" text-anchor="middle" font-family="Arial,sans-serif" font-size="30" font-weight="bold" fill="#f8fafc">How Speech Relay Works</text>
+<g font-family="Arial,sans-serif" text-anchor="middle">
+<rect x="220" y="75" width="460" height="94" rx="15" fill="#1d4ed8"/>
+<text x="450" y="110" font-size="23" font-weight="bold" fill="white">Speech Relay Mobile</text>
+<text x="450" y="138" font-size="16" fill="#dbeafe">Select voice and generator, send message</text>
+<path d="M450 169 V205" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="270" y="210" width="360" height="70" rx="13" fill="#334155"/>
+<text x="450" y="239" font-size="20" font-weight="bold" fill="white">HTTP API Request</text>
+<text x="450" y="261" font-size="15" fill="#cbd5e1">Over local network</text>
+<path d="M450 280 V314" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="220" y="320" width="460" height="91" rx="15" fill="#4338ca"/>
+<text x="450" y="353" font-size="23" font-weight="bold" fill="white">Speech Relay Desktop</text>
+<text x="450" y="380" font-size="16" fill="#e0e7ff">Receives message and uses the selected TTS engine</text>
+<path d="M450 411 V445 M150 445 H750 M150 445 V475 M450 445 V475 M750 445 V475" fill="none" stroke="#94a3b8" stroke-width="3"/>
+<rect x="30" y="475" width="240" height="67" rx="12" fill="#6d28d9"/>
+<rect x="330" y="475" width="240" height="67" rx="12" fill="#6d28d9"/>
+<rect x="630" y="475" width="240" height="67" rx="12" fill="#6d28d9"/>
+<text x="150" y="514" font-size="20" font-weight="bold" fill="white">Windows Narrator</text>
+<text x="450" y="514" font-size="20" font-weight="bold" fill="white">Azure Speech</text>
+<text x="750" y="514" font-size="20" font-weight="bold" fill="white">Piper</text>
+<path d="M150 542 V576 H450 M750 542 V576 H450 M450 542 V615" fill="none" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="180" y="620" width="540" height="85" rx="15" fill="#0f766e"/>
+<text x="450" y="652" font-size="22" font-weight="bold" fill="white">Audio Routing (e.g., Elgato Wave Link)</text>
+<text x="450" y="679" font-size="16" fill="#ccfbf1">Routes synthesized speech into microphone mix</text>
+<path d="M450 705 V739" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow)"/>
+<rect x="180" y="744" width="540" height="86" rx="15" fill="#166534"/>
+<text x="450" y="776" font-size="22" font-weight="bold" fill="white">Discord / Games / Voice Calls</text>
+<text x="450" y="804" font-size="16" fill="#dcfce7">Other participants hear the generated speech</text>
+</g></svg>
