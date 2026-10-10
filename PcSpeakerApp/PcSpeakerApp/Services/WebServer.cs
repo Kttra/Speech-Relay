@@ -11,7 +11,7 @@ using Windows.Media.SpeechSynthesis;
 using Windows.Storage.Streams;
 using AzureSpeech = Microsoft.CognitiveServices.Speech;
 
-namespace PcSpeakerApp;
+namespace PcSpeakerApp.Services;
 
 public class WebServer : IWebServer
 {

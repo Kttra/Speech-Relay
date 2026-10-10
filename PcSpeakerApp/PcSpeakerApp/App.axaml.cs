@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PcSpeakerApp.Services;
 using PcSpeakerApp.ViewModels;
 using PcSpeakerApp.Views;
 using System;
@@ -29,6 +30,7 @@ public partial class App : Application
         var services = new ServiceCollection();
         services.AddSingleton<IConfiguration>(config);
         services.AddSingleton<IWebServer, WebServer>();
+        services.AddSingleton<IPairingQrCodeService, PairingQrCodeService>();
         services.AddSingleton<MainWindowViewModel>();
 
         Services = services.BuildServiceProvider();

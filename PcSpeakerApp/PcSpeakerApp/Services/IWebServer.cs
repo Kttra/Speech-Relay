@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using static PcSpeakerApp.WebServer;
+using static PcSpeakerApp.Services.WebServer;
 
-namespace PcSpeakerApp;
+namespace PcSpeakerApp.Services;
 
 public interface IWebServer
 {
