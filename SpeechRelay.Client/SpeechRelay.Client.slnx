@@ -1,0 +1,11 @@
+<Solution>
+  <Project Path="SpeechRelay.Client.Android/SpeechRelay.Client.Android.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="SpeechRelay.Client.Browser/SpeechRelay.Client.Browser.csproj" />
+  <Project Path="SpeechRelay.Client.Desktop/SpeechRelay.Client.Desktop.csproj" />
+  <Project Path="SpeechRelay.Client.iOS/SpeechRelay.Client.iOS.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="SpeechRelay.Client/SpeechRelay.Client.csproj" />
+</Solution>
