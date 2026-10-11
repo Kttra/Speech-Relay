@@ -6,6 +6,7 @@ using SpeechRelay.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
@@ -16,6 +17,7 @@ namespace SpeechRelay.Client.ViewModels
         private readonly HttpClient _http;
         private readonly SettingsService _settingsService;
         private readonly AppSettings _settings;
+        private readonly IQRCodeScanner _qrScanner;
 
         [ObservableProperty]
         private string pcIp;
@@ -31,12 +33,17 @@ namespace SpeechRelay.Client.ViewModels
         private string selectedVoiceGenerator = "Windows Narrator";
         [ObservableProperty]
         private List<string> availableVoices = new();
+        [ObservableProperty]
+        private string authToken = "";
+        [ObservableProperty]
+        private bool isAndroid = false;
 
-        public MainViewModel(HttpClient http, IConfiguration config, SettingsService settingsService)
+        public MainViewModel(HttpClient http, IConfiguration config, SettingsService settingsService, IQRCodeScanner qrScanner)
         {
             _http = http;
             _settingsService = settingsService;
-            _settings = _settingsService.Load();
+            _qrScanner = qrScanner;
+            _settings = settingsService.Load();
 
             var defaultPcIp = config["Api:DefaultPcIp"] ?? "";
             PcIp = string.IsNullOrEmpty(_settings.PcIp) ? defaultPcIp : _settings.PcIp;
@@ -47,6 +54,8 @@ namespace SpeechRelay.Client.ViewModels
             }
 
             OnSelectedVoiceGeneratorChanged(SelectedVoiceGenerator);
+            IsAndroid = OperatingSystem.IsAndroid();
+            AuthToken = string.IsNullOrEmpty(_settings.AuthToken) ? (config["Api:AuthToken"] ?? string.Empty) : _settings.AuthToken;
         }
 
         partial void OnSelectedVoiceGeneratorChanged(string value)
@@ -116,6 +125,7 @@ namespace SpeechRelay.Client.ViewModels
             _settings.PcIp = PcIp;
             _settings.SelectedVoice = SelectedVoice;
             _settings.SelectedVoiceGenerator = SelectedVoiceGenerator;
+            _settings.AuthToken = AuthToken ?? string.Empty;
 
             _settingsService.Save(_settings);
         }
@@ -159,6 +169,42 @@ namespace SpeechRelay.Client.ViewModels
             else
             {
                 CommandText = string.Empty;
+            }
+        }
+
+        [RelayCommand]
+        private async Task ScanPairingFromCameraAsync()
+        {
+            try
+            {
+                var payload = await _qrScanner.ScanFromCameraAsync();
+                if (payload == null)
+                {
+                    ServerResponse = "No pairing data found.";
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(payload.IpAddress))
+                {
+                    ServerResponse = "Invalid pairing data.";
+                    return;
+                }
+
+                // Apply pairing payload
+                PcIp = payload.IpAddress;
+                if (!string.IsNullOrEmpty(payload.Token))
+                {
+                    _settings.AuthToken = payload.Token;
+                    AuthToken = payload.Token;
+                    _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", payload.Token);
+                }
+
+                SaveSettings();
+                ServerResponse = $"Paired with {PcIp}";
+            }
+            catch (Exception ex)
+            {
+                ServerResponse = "Error scanning pairing data: " + ex.Message;
             }
         }
     }

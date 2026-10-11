@@ -56,6 +56,17 @@ namespace SpeechRelay.Client
             // Register services
             services.AddSingleton<Services.SettingsService>();
 
+            var platformScannerType = Type.GetType("SpeechRelay.Client.Platforms.Android.ZXingBarcodeScanner, SpeechRelay.Client.Android")
+                                   ?? Type.GetType("SpeechRelay.Client.Platforms.iOS.PlatformQRCodeScanner, SpeechRelay.Client.iOS");
+            if (platformScannerType != null)
+            {
+                services.AddSingleton(typeof(Services.IQRCodeScanner), platformScannerType);
+            }
+            else
+            {
+                services.AddSingleton<Services.IQRCodeScanner, Services.QRCodeScanner>();
+            }
+
             // Register ViewModels
             services.AddTransient<MainViewModel>();
             Services = services.BuildServiceProvider();

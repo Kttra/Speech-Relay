@@ -29,6 +29,11 @@
                             MinHeight="40"/>
             </StackPanel>
 
+			<StackPanel Spacing="5">
+				<TextBlock Text="Auth Token" FontSize="16" FontWeight="Bold"/>
+				<TextBox Text="{Binding AuthToken, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="40"/>
+			</StackPanel>
+			
             <StackPanel Spacing="5">
                 <TextBlock Text="Text to Speak" FontSize="16" FontWeight="Bold" />
                 <TextBox Text="{Binding CommandText}"
@@ -86,6 +91,19 @@
                     Foreground="White"
                     FontSize="18"
                     FontWeight="Bold"/>
+
+            <!-- Scan Pairing Button (Android only for now) -->
+            <Button Content="Scan Pairing (Camera)"
+                    Command="{Binding ScanPairingFromCameraCommand}"
+					IsVisible="{Binding IsAndroid}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    MinHeight="45"
+                    Background="#2196F3"
+                    Foreground="White"
+                    FontSize="16"
+                    FontWeight="SemiBold"/>
 
             <TextBlock Text="{Binding ServerResponse}"
                 TextWrapping="Wrap"

@@ -30,6 +30,9 @@ namespace SpeechRelay.Host.ViewModels
         [ObservableProperty]
         private Bitmap? pairingQrCode;
 
+        [ObservableProperty]
+        private string authToken = "";
+
         public IRelayCommand SubmitCommand { get; }
         private readonly IWebServer _webServer;
         private readonly IPairingQrCodeService _qrService;
@@ -60,7 +63,7 @@ namespace SpeechRelay.Host.ViewModels
         private void UpdatePairingQrCode()
         {
             var ip = ListeningIp;
-            var token = _config["Auth:Token"];
+            var token = _config["Auth:Token"] ?? string.Empty;
             var generateRandom = _config["Auth:GenerateRandomToken"]?.ToLower() == "true";
             if (generateRandom || string.IsNullOrEmpty(token))
             {
@@ -68,9 +71,20 @@ namespace SpeechRelay.Host.ViewModels
             }
             _config["Auth:Token"] = token;
 
+            AuthToken = token;
             var bytes = _qrService.Generate(ip, token);
             using var stream = new MemoryStream(bytes);
             PairingQrCode = new Bitmap(stream);
+        }
+
+        [RelayCommand]
+        private void ApplyAuthToken()
+        {
+            if (string.IsNullOrEmpty(AuthToken))
+                return;
+
+            _config["Auth:Token"] = AuthToken;
+            UpdatePairingQrCode();
         }
 
         public void UpdateText(string text)
