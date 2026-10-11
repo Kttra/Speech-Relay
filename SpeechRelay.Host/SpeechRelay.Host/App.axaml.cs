@@ -22,8 +22,12 @@ public partial class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         // 1. Load configuration
+        using var stream = typeof(App).Assembly
+            .GetManifestResourceStream("SpeechRelay.Host.appsettings.json")
+            ?? throw new InvalidOperationException("Embedded configuration not found.");
+
         var config = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json", optional: false)
+            .AddJsonStream(stream)
             .Build();
 
         // 2. Register services

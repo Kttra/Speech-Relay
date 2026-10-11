@@ -36,10 +36,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </None>
+	<EmbeddedResource Include="appsettings.json" />
+	<None Update="appsettings.json">
+		<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		<CopyToPublishDirectory>Never</CopyToPublishDirectory>
+	</None>
     <None Update="Piper\espeak-ng.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
