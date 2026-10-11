@@ -20,7 +20,7 @@
   <ItemGroup>
     <PackageReference Include="Avalonia.Android" />
     <PackageReference Include="Xamarin.AndroidX.Core.SplashScreen" />
-    <PackageReference Include="ZXing.Net.Mobile" />
+    <PackageReference Include="Xamarin.GooglePlayServices.Code.Scanner" />
   </ItemGroup>
 
   <ItemGroup>
