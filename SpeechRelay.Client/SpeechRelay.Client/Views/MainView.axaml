@@ -26,12 +26,13 @@
                 <TextBox Text="{Binding PcIp}"
                             HorizontalAlignment="Stretch"
                             VerticalContentAlignment="Center"
-                            MinHeight="40"/>
+                            MinHeight="40"
+						    MaxWidth="370"/>
             </StackPanel>
 
 			<StackPanel Spacing="5">
 				<TextBlock Text="Auth Token" FontSize="16" FontWeight="Bold"/>
-				<TextBox Text="{Binding AuthToken, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="40"/>
+				<TextBox MaxWidth="370" Text="{Binding AuthToken, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="40"/>
 			</StackPanel>
 			
             <StackPanel Spacing="5">
@@ -39,7 +40,8 @@
                 <TextBox Text="{Binding CommandText}"
                             HorizontalAlignment="Stretch"
                             VerticalContentAlignment="Center"
-                            MinHeight="40"/>
+                            MinHeight="40"
+							MaxWidth="370"/>
             </StackPanel>
 
 			<StackPanel Spacing="5">
@@ -47,7 +49,8 @@
 				<ComboBox MinHeight="40"
                             HorizontalAlignment="Stretch"
                             SelectedIndex="0"
-                            SelectedItem="{Binding SelectedVoiceGenerator}">
+                            SelectedItem="{Binding SelectedVoiceGenerator}"
+						    MaxWidth="370">
 					<x:String>Windows Narrator</x:String>
 					<x:String>Azure Speech</x:String>
 					<x:String>Piper</x:String>
@@ -62,7 +65,8 @@
 				<ComboBox MinHeight="40"
 						  HorizontalAlignment="Stretch"
 						  ItemsSource="{Binding AvailableVoices}"
-						  SelectedItem="{Binding SelectedVoice}" />
+						  SelectedItem="{Binding SelectedVoice}"
+						  MaxWidth="370"/>
 			</StackPanel>
 
             <StackPanel Spacing="5">
@@ -70,7 +74,8 @@
                 <ComboBox MinHeight="40"
                             HorizontalAlignment="Stretch"
                             SelectedIndex="0"
-                            SelectedItem="{Binding SelectedPresetMsg}">
+                            SelectedItem="{Binding SelectedPresetMsg}"
+                            MaxWidth="370">
                     <x:String>Custom</x:String>
                     <x:String>Yes sir</x:String>
                     <x:String>No sir</x:String>
@@ -90,7 +95,8 @@
                     Background="#4CAF50"
                     Foreground="White"
                     FontSize="18"
-                    FontWeight="Bold"/>
+                    FontWeight="Bold"
+					MaxWidth="370"/>
 
             <!-- Scan Pairing Button (Android only for now) -->
             <Button Content="Scan Pairing (Camera)"
@@ -103,7 +109,8 @@
                     Background="#2196F3"
                     Foreground="White"
                     FontSize="16"
-                    FontWeight="SemiBold"/>
+                    FontWeight="SemiBold"
+					MaxWidth="370"/>
 
             <TextBlock Text="{Binding ServerResponse}"
                 TextWrapping="Wrap"

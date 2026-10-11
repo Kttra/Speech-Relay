@@ -14,10 +14,7 @@ public class MlKitBarcodeScanner : IQRCodeScanner
 {
     public async Task<PairingPayload?> ScanFromCameraAsync()
     {
-        var activity = MainActivity.Instance
-            ?? throw new InvalidOperationException(
-                "MainActivity is not available.");
-
+        var activity = MainActivity.Instance ?? throw new InvalidOperationException("MainActivity is not available.");
         var options = new GmsBarcodeScannerOptions.Builder()
             .SetBarcodeFormats(Barcode.FormatQrCode)
             .Build();
