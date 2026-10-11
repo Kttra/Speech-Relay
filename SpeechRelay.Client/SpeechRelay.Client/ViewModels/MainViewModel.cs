@@ -2,9 +2,11 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Configuration;
 using SpeechRelay.Client.Services;
+using SpeechRelay.Shared.Models;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace SpeechRelay.Client.ViewModels
@@ -95,14 +97,14 @@ namespace SpeechRelay.Client.ViewModels
             };
         }
 
-        private string GetGeneratorName()
+        private AudioGenerator GetGeneratorName()
         {
             return SelectedVoiceGenerator switch
             {
-                "Windows Narrator" => "WindowsNarrator",
-                "Azure Speech" => "AzureSpeech",
-                "Piper" => "Piper",
-                _ => "0"
+                "Windows Narrator" => AudioGenerator.WindowsNarrator,
+                "Azure Speech" => AudioGenerator.AzureSpeech,
+                "Piper" => AudioGenerator.Piper,
+                _ => AudioGenerator.WindowsNarrator
             };
         }
 
@@ -132,17 +134,14 @@ namespace SpeechRelay.Client.ViewModels
                 }
 
                 var url = $"http://{PcIp}:5000/speak/";
-
-                var content = new FormUrlEncodedContent(new[]
+                var request = new SpeechRequest
                 {
-                    new KeyValuePair<string, string>("text", msg),
-                    new KeyValuePair<string, string>("voice", GetVoiceName()),
-                    new KeyValuePair<string, string>("generator", GetGeneratorName())
-                });
-
-                var response = await _http.PostAsync(url, content);
-                var body = await response.Content.ReadAsStringAsync();
-                ServerResponse = body;
+                    Text = msg,
+                    Voice = GetVoiceName(),
+                    Generator = GetGeneratorName()
+                };
+                var response = await _http.PostAsJsonAsync(url, request, SpeechRelayJson.Options);
+                ServerResponse = await response.Content.ReadAsStringAsync();
 
                 // Save the current settings after a successful send
                 SaveSettings();

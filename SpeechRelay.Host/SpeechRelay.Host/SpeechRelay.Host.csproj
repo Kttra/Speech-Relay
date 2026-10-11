@@ -60,4 +60,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\SpeechRelay.Shared\SpeechRelay.Shared.csproj" />
+  </ItemGroup>
 </Project>

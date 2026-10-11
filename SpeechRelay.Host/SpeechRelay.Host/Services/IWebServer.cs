@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using static SpeechRelay.Host.Services.WebServer;
+using SpeechRelay.Shared.Models;
 
 namespace SpeechRelay.Host.Services;
 

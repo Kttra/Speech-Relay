@@ -22,4 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SpeechRelay.Client\SpeechRelay.Client.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\SpeechRelay.Shared\SpeechRelay.Shared.csproj" />
+  </ItemGroup>
 </Project>

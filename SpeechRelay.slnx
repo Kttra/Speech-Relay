@@ -1,8 +1,6 @@
 <Solution>
   <Folder Name="/SpeechRelay.Client/">
-    <Project Path="SpeechRelay.Client/SpeechRelay.Client.Android/SpeechRelay.Client.Android.csproj">
-      <Deploy Solution="Debug|*" />
-    </Project>
+    <Project Path="SpeechRelay.Client/SpeechRelay.Client.Android/SpeechRelay.Client.Android.csproj" />
     <Project Path="SpeechRelay.Client/SpeechRelay.Client.Browser/SpeechRelay.Client.Browser.csproj" />
     <Project Path="SpeechRelay.Client/SpeechRelay.Client.Desktop/SpeechRelay.Client.Desktop.csproj" />
     <Project Path="SpeechRelay.Client/SpeechRelay.Client.iOS/SpeechRelay.Client.iOS.csproj" />
@@ -11,4 +9,5 @@
   <Folder Name="/SpeechRelay.Host/">
     <Project Path="SpeechRelay.Host/SpeechRelay.Host/SpeechRelay.Host.csproj" />
   </Folder>
+  <Project Path="SpeechRelay.Shared/SpeechRelay.Shared.csproj" />
 </Solution>

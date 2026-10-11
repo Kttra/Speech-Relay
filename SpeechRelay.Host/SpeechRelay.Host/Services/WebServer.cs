@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
+using SpeechRelay.Shared.Models;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Windows.Media.Core;
 using Windows.Media.Playback;
@@ -43,8 +45,24 @@ public class WebServer : IWebServer
     {
         try
         {
-            var providedToken = ctx.Request.Headers["X-Auth-Token"];
-            if (providedToken != _config["Auth:Token"])
+            // Expect Authorization: Bearer <token>
+            var authHeader = ctx.Request.Headers["Authorization"];
+            string providedToken = "";
+            if (!string.IsNullOrEmpty(authHeader))
+            {
+                const string bearer = "Bearer ";
+                if (authHeader.StartsWith(bearer, StringComparison.OrdinalIgnoreCase))
+                {
+                    providedToken = authHeader.Substring(bearer.Length).Trim();
+                }
+                else
+                {
+                    providedToken = authHeader;
+                }
+            }
+
+            var expectedToken = _config["Auth:Token"];
+            if (providedToken != expectedToken)
             {
                 ctx.Response.StatusCode = 401;
                 Write(ctx, "Unauthorized");
@@ -57,14 +75,27 @@ public class WebServer : IWebServer
 
             if (ctx.Request.HttpMethod == "POST")
             {
-                using var reader = new StreamReader(ctx.Request.InputStream, ctx.Request.ContentEncoding);
-                var body = await reader.ReadToEndAsync();
+                try
+                {
+                    var request = await JsonSerializer.DeserializeAsync<SpeechRequest>(
+                        ctx.Request.InputStream,
+                        SpeechRelayJson.Options);
 
-                // Parse form data
-                var parsed = System.Web.HttpUtility.ParseQueryString(body);
-                text = parsed["text"] ?? "";
-                voice = parsed["voice"] ?? voice;
-                generator = ParseAudioGenerator(parsed["generator"] ?? "");
+                    if (request == null)
+                    {
+                        ctx.Response.StatusCode = 400;
+                        return;
+                    }
+
+                    text = request.Text ?? "";
+                    voice = string.IsNullOrEmpty(request.Voice) ? voice : request.Voice;
+                    generator = request.Generator;
+                }
+                catch (JsonException)
+                {
+                    ctx.Response.StatusCode = 400;
+                    return;
+                }
             }
             else
             {
@@ -117,16 +148,6 @@ public class WebServer : IWebServer
             PlayAudio(audio);
         });
         return true;
-    }
-
-    private AudioGenerator ParseAudioGenerator(string generatorStr)
-    {
-        if (Enum.TryParse<AudioGenerator>(generatorStr, true, out var value))
-        {
-            return value;
-        }
-
-        return AudioGenerator.WindowsNarrator;
     }
 
     private void Write(HttpListenerContext ctx, string msg)
@@ -229,12 +250,5 @@ public class WebServer : IWebServer
         var player = new MediaPlayer();
         player.Source = MediaSource.CreateFromStream(random, "audio/wav");
         player.Play();
-    }
-
-    public enum AudioGenerator
-    {
-        WindowsNarrator = 0,
-        AzureSpeech = 1,
-        Piper = 2
     }
 }

@@ -1,16 +1,22 @@
 ﻿using QRCoder;
+using SpeechRelay.Shared.Models;
 using System.Text.Json;
 
 public class PairingQrCodeService : IPairingQrCodeService
 {
     public byte[] Generate(string ipAddress, string token, int? port = 5000)
     {
-        var payload = JsonSerializer.Serialize(new
+        var payloadObj = new PairingPayload
         {
-            version = 1,
-            ipAddress,
-            port = port,
-            token
+            Version = 1,
+            IpAddress = ipAddress,
+            Port = port,
+            Token = token
+        };
+
+        var payload = JsonSerializer.Serialize(payloadObj, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         });
 
         using var data = QRCodeGenerator.GenerateQrCode(payload, QRCodeGenerator.ECCLevel.Q);

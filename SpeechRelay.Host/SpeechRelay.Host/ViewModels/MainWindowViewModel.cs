@@ -3,13 +3,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Configuration;
 using SpeechRelay.Host.Services;
+using SpeechRelay.Shared.Models;
 using System;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Security.Cryptography;
-using static SpeechRelay.Host.Services.WebServer;
 
 namespace SpeechRelay.Host.ViewModels
 {

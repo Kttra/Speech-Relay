@@ -8,6 +8,7 @@ using SpeechRelay.Client.Views;
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace SpeechRelay.Client
 {
@@ -37,14 +38,17 @@ namespace SpeechRelay.Client
             // Register config as a simple object
             services.AddSingleton<IConfiguration>(config);
 
-            // Register HttpClient with X-Auth-Token from config
+            // Register HttpClient with Authorization: Bearer <token> from config
             services.AddSingleton<HttpClient>(provider =>
             {
                 var cfg = provider.GetRequiredService<IConfiguration>();
                 var token = cfg["Api:AuthToken"];
 
                 var client = new HttpClient();
-                client.DefaultRequestHeaders.Add("X-Auth-Token", token);
+                if (!string.IsNullOrEmpty(token))
+                {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
                 client.Timeout = TimeSpan.FromSeconds(10);
                 return client;
             });
