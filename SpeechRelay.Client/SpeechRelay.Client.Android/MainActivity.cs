@@ -12,6 +12,8 @@ namespace SpeechRelay.Client.Platforms.Android
     public class MainActivity : AvaloniaMainActivity
     {
         public static MainActivity? Instance { get; private set; }
+        private const int RequestCameraPermissionCode = 2001;
+        private static System.Threading.Tasks.TaskCompletionSource<bool>? _permissionTcs;
         private const int RequestImageCapture = 1001;
         private static System.Threading.Tasks.TaskCompletionSource<global::Android.Graphics.Bitmap?>? _tcs;
 
@@ -19,6 +21,21 @@ namespace SpeechRelay.Client.Platforms.Android
         {
             base.OnCreate(savedInstanceState);
             Instance = this;
+        }
+
+        public static System.Threading.Tasks.Task<bool> RequestCameraPermissionAsync()
+        {
+            if (Instance == null) return System.Threading.Tasks.Task.FromResult(false);
+
+            var ctx = Instance;
+            if (global::AndroidX.Core.Content.ContextCompat.CheckSelfPermission(ctx, global::Android.Manifest.Permission.Camera) == (int)global::Android.Content.PM.Permission.Granted)
+            {
+                return System.Threading.Tasks.Task.FromResult(true);
+            }
+
+            _permissionTcs = new System.Threading.Tasks.TaskCompletionSource<bool>(System.Threading.Tasks.TaskCreationOptions.RunContinuationsAsynchronously);
+            ctx.RequestPermissions(new[] { global::Android.Manifest.Permission.Camera }, RequestCameraPermissionCode);
+            return _permissionTcs.Task;
         }
 
         public static System.Threading.Tasks.Task<global::Android.Graphics.Bitmap?> TakePictureAsync()
@@ -43,6 +60,17 @@ namespace SpeechRelay.Client.Platforms.Android
                 }
 
                 _tcs?.TrySetResult(bmp);
+            }
+        }
+
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+        {
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            if (requestCode == RequestCameraPermissionCode)
+            {
+                var granted = grantResults.Length > 0 && grantResults[0] == Permission.Granted;
+                _permissionTcs?.TrySetResult(granted);
+                _permissionTcs = null;
             }
         }
     }
