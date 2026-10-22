@@ -122,6 +122,20 @@ These commands remove the URL reservation and firewall rule created during setup
 
 Some speech engines require additional setup, credentials, or model downloads.
 
+### Piper Setup
+[Piper](https://github.com/OHF-Voice/piper1-gpl) requires Python and a downloaded voice model.
+1. Download and install [Python 3.12.10](https://www.python.org/downloads/release/python-31210/). Select `Add python.exe to PATH` to make Python accessible from the command line.
+2. Open Command Prompt and install Piper:
+   ```cmd
+   python -m pip install piper-tts
+   ```
+3. Download a voice model. For example, to download the `en_US-joe-medium` voice.:
+
+   ```cmd
+   python -m piper.download_voices en_US-joe-medium --download-dir "%USERPROFILE%\PiperModels"
+   ```
+4. Launch Speech Relay and select Piper as the speech engine.
+
 </details>
 
 <details>
