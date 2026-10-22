@@ -123,7 +123,7 @@ public class WebServer : IWebServer
 
     public async Task<bool> ProcessVoice(string text, string voice, AudioGenerator audioGenerator)
     {
-        byte[] audio = null;
+        byte[]? audio = null;
         switch (audioGenerator)
         {
             case AudioGenerator.Piper:
@@ -156,39 +156,72 @@ public class WebServer : IWebServer
         writer.Write(msg);
     }
 
-    //https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/CLI.md
-    //voices: https://rhasspy.github.io/piper-samples/#en_US-joe-medium
+    //Piper: https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/CLI.md
+    //Voice: https://rhasspy.github.io/piper-samples/#en_US-joe-medium
+    //Download voice command: python -m piper.download_voices en_US-joe-medium --download-dir "%USERPROFILE%\PiperModels"
     public async Task<byte[]> PiperSpeakAsync(string text, string voice = "en_US-joe-medium.onnx")
     {
-        //python -m piper.download_voices en_US-joe-medium --download-dir "%USERPROFILE%\PiperModels"
         var modelPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             "PiperModels",
             voice
         );
-        var outputPath = Path.GetTempFileName() + ".wav";
 
-        var psi = new ProcessStartInfo
+        if (!File.Exists(modelPath))
         {
-            FileName = "python",
-            Arguments = $"-m piper --model \"{modelPath}\" --output_file \"{outputPath}\"",
-            RedirectStandardInput = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var process = Process.Start(psi);
-        await process.StandardInput.WriteLineAsync(text);
-        process.StandardInput.Close();
-        await process.WaitForExitAsync();
-
-        if (File.Exists(outputPath))
-        {
-            var bytes = File.ReadAllBytes(outputPath);
-            File.Delete(outputPath);
-            return bytes;
+            throw new FileNotFoundException("Piper voice model not found.", modelPath);
         }
-        return null;
+
+        var outputPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.wav");
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = "py",
+                Arguments = $"-3.12 -m piper --model \"{modelPath}\" --output_file \"{outputPath}\"",
+                RedirectStandardInput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(psi) ?? throw new InvalidOperationException("Failed to start Piper.");
+            var errorTask = process.StandardError.ReadToEndAsync();
+
+            try
+            {
+                await process.StandardInput.WriteLineAsync(text);
+            }
+            catch (IOException)
+            {
+                // Piper may have exited before accepting input.
+            }
+            finally
+            {
+                process.StandardInput.Close();
+            }
+
+            await process.WaitForExitAsync();
+            var error = await errorTask;
+
+            if (process.ExitCode != 0)
+            {
+                throw new InvalidOperationException($"Piper failed (exit code {process.ExitCode}): {error}");
+            }
+
+            if (!File.Exists(outputPath))
+            {
+                throw new FileNotFoundException("Piper did not generate an audio file.", outputPath);
+            }
+            return await File.ReadAllBytesAsync(outputPath);
+        }
+        finally
+        {
+            if (File.Exists(outputPath))
+            {
+                File.Delete(outputPath);
+            }
+        }
     }
 
     //Using window narrator for TTS, but it has very limited voice options and quality isn't great

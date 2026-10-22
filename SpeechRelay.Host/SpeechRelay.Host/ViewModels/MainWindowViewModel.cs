@@ -44,6 +44,7 @@ namespace SpeechRelay.Host.ViewModels
             _qrService = qrService;
             _config = config;
 
+            SelectedVoiceGenerator = _config["DefaultAudioGenerator"] ?? "WindowsNarrator";
             ListeningIp = GetWifiIp();
             UpdatePairingQrCode();
 
