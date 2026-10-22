@@ -156,11 +156,11 @@ public class WebServer : IWebServer
         writer.Write(msg);
     }
 
-    //https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/CLI.md
-    //voices: https://rhasspy.github.io/piper-samples/#en_US-joe-medium
+    //Piper: https://github.com/OHF-Voice/piper1-gpl/blob/main/docs/CLI.md
+    //Voice: https://rhasspy.github.io/piper-samples/#en_US-joe-medium
+    //Download voice command: python -m piper.download_voices en_US-joe-medium --download-dir "%USERPROFILE%\PiperModels"
     public async Task<byte[]> PiperSpeakAsync(string text, string voice = "en_US-joe-medium.onnx")
     {
-        //python -m piper.download_voices en_US-joe-medium --download-dir "%USERPROFILE%\PiperModels"
         var modelPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             "PiperModels",
