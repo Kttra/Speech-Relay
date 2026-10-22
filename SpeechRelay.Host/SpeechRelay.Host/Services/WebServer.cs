@@ -170,8 +170,8 @@ public class WebServer : IWebServer
 
         var psi = new ProcessStartInfo
         {
-            FileName = "python",
-            Arguments = $"-m piper --model \"{modelPath}\" --output_file \"{outputPath}\"",
+            FileName = "py",
+            Arguments = $"-3.12 -m piper --model \"{modelPath}\" --output_file \"{outputPath}\"",
             RedirectStandardInput = true,
             UseShellExecute = false,
             CreateNoWindow = true
