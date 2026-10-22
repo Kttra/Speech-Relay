@@ -27,12 +27,12 @@
                             HorizontalAlignment="Stretch"
                             VerticalContentAlignment="Center"
                             MinHeight="40"
-						    MaxWidth="370"/>
+						    MaxWidth="350"/>
             </StackPanel>
 
 			<StackPanel Spacing="5">
 				<TextBlock Text="Auth Token" FontSize="16" FontWeight="Bold"/>
-				<TextBox MaxWidth="370" Text="{Binding AuthToken, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="40"/>
+				<TextBox MaxWidth="350" Text="{Binding AuthToken, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="40"/>
 			</StackPanel>
 			
             <StackPanel Spacing="5">
@@ -41,7 +41,7 @@
                             HorizontalAlignment="Stretch"
                             VerticalContentAlignment="Center"
                             MinHeight="40"
-							MaxWidth="370"/>
+							MaxWidth="350"/>
             </StackPanel>
 
 			<StackPanel Spacing="5">
@@ -50,7 +50,7 @@
                             HorizontalAlignment="Stretch"
                             SelectedIndex="0"
                             SelectedItem="{Binding SelectedVoiceGenerator}"
-						    MaxWidth="370">
+						    MaxWidth="350">
 					<x:String>Windows Narrator</x:String>
 					<x:String>Azure Speech</x:String>
 					<x:String>Piper</x:String>
@@ -66,7 +66,7 @@
 						  HorizontalAlignment="Stretch"
 						  ItemsSource="{Binding AvailableVoices}"
 						  SelectedItem="{Binding SelectedVoice}"
-						  MaxWidth="370"/>
+						  MaxWidth="350"/>
 			</StackPanel>
 
             <StackPanel Spacing="5">
@@ -75,7 +75,7 @@
                             HorizontalAlignment="Stretch"
                             SelectedIndex="0"
                             SelectedItem="{Binding SelectedPresetMsg}"
-                            MaxWidth="370">
+                            MaxWidth="350">
                     <x:String>Custom</x:String>
                     <x:String>Yes sir</x:String>
                     <x:String>No sir</x:String>
@@ -96,7 +96,7 @@
                     Foreground="White"
                     FontSize="18"
                     FontWeight="Bold"
-					MaxWidth="370"/>
+					MaxWidth="350"/>
 
             <!-- Scan Pairing Button (Android only for now) -->
             <Button Content="Scan Pairing (Camera)"
@@ -110,7 +110,7 @@
                     Foreground="White"
                     FontSize="16"
                     FontWeight="SemiBold"
-					MaxWidth="370"/>
+					MaxWidth="350"/>
 
             <TextBlock Text="{Binding ServerResponse}"
                 TextWrapping="Wrap"
