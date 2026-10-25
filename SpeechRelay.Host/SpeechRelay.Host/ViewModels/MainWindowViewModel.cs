@@ -3,8 +3,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Configuration;
 using SpeechRelay.Host.Services;
-using SpeechRelay.Shared.Models;
+using SpeechRelay.Shared.Services;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -25,7 +26,13 @@ namespace SpeechRelay.Host.ViewModels
         private string inputText = "";
 
         [ObservableProperty]
-        private string selectedVoiceGenerator = "WindowsNarrator";
+        private string selectedVoiceGenerator = "";
+
+        [ObservableProperty]
+        private List<string> availableVoices = new();
+
+        [ObservableProperty]
+        private string selectedVoice = string.Empty;
 
         [ObservableProperty]
         private Bitmap? pairingQrCode;
@@ -34,6 +41,7 @@ namespace SpeechRelay.Host.ViewModels
         private string authToken = "";
 
         public IRelayCommand SubmitCommand { get; }
+        public IRelayCommand ApplyAuthTokenCommand { get; }
         private readonly IWebServer _webServer;
         private readonly IPairingQrCodeService _qrService;
         private readonly IConfiguration _config;
@@ -44,21 +52,41 @@ namespace SpeechRelay.Host.ViewModels
             _qrService = qrService;
             _config = config;
 
-            SelectedVoiceGenerator = _config["DefaultAudioGenerator"] ?? "WindowsNarrator";
+            SelectedVoiceGenerator = _config["DefaultAudioGenerator"] ?? "Windows Narrator";
+            var initialGenerator = VoiceOptions.GetAudioGenerator(SelectedVoiceGenerator);
+            AvailableVoices = VoiceOptions.GetVoices(initialGenerator);
+            SelectedVoice = AvailableVoices.Count > 0 ? AvailableVoices[0] : string.Empty;
             ListeningIp = GetWifiIp();
             UpdatePairingQrCode();
 
             _webServer.TextReceived += text =>
             {
-                LastText = text;
+                LastText = $"{SelectedVoiceGenerator} [{SelectedVoice}]: {text}";
             };
 
             SubmitCommand = new RelayCommand(async () =>
             {
-                LastText = InputText;
-                var audio = await _webServer.ProcessVoice(InputText, "", GetDefaultAudioGenerator());
+                LastText = $"{SelectedVoiceGenerator} [{SelectedVoice}]: {InputText}";
+                var audio = await _webServer.ProcessVoice(InputText, VoiceOptions.GetVoiceName(SelectedVoice), VoiceOptions.GetAudioGenerator(SelectedVoiceGenerator));
                 InputText = "";
             });
+
+            ApplyAuthTokenCommand = new RelayCommand(() =>
+            {
+                if (string.IsNullOrEmpty(AuthToken))
+                    return;
+                _config["Auth:Token"] = AuthToken;
+                UpdatePairingQrCode();
+            });
+        }
+
+        partial void OnSelectedVoiceGeneratorChanged(string value)
+        {
+            var generator = VoiceOptions.GetAudioGenerator(value);
+            AvailableVoices = VoiceOptions.GetVoices(generator);
+
+            // Default to the first available voice, if any.
+            SelectedVoice = AvailableVoices.Count > 0 ? AvailableVoices[0] : string.Empty;
         }
 
         private void UpdatePairingQrCode()
@@ -78,19 +106,9 @@ namespace SpeechRelay.Host.ViewModels
             PairingQrCode = new Bitmap(stream);
         }
 
-        [RelayCommand]
-        private void ApplyAuthToken()
-        {
-            if (string.IsNullOrEmpty(AuthToken))
-                return;
-
-            _config["Auth:Token"] = AuthToken;
-            UpdatePairingQrCode();
-        }
-
         public void UpdateText(string text)
         {
-            LastText = text;
+            LastText = $"{text} (Voice: {SelectedVoice}, Generator: {SelectedVoiceGenerator})";
         }
 
         // May need to use a different method to get the IP address in the future, as this method may not work in all environments
@@ -108,16 +126,6 @@ namespace SpeechRelay.Host.ViewModels
                 .UnicastAddresses
                 .FirstOrDefault(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
                 ?.Address.ToString() ?? "127.0.0.1";
-        }
-
-        private AudioGenerator GetDefaultAudioGenerator()
-        {
-            if (Enum.TryParse<AudioGenerator>(SelectedVoiceGenerator ?? "", true, out var value))
-            {
-                return value;
-            }
-
-            return AudioGenerator.WindowsNarrator;
         }
     }
 }

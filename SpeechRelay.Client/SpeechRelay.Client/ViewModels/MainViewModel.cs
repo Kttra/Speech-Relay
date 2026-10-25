@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Configuration;
 using SpeechRelay.Client.Services;
 using SpeechRelay.Shared.Models;
+using SpeechRelay.Shared.Services;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -60,61 +61,10 @@ namespace SpeechRelay.Client.ViewModels
 
         partial void OnSelectedVoiceGeneratorChanged(string value)
         {
-            AvailableVoices = value switch
-            {
-                "Windows Narrator" => new List<string>
-                {
-                    "Microsoft David",
-                    "Microsoft Zira",
-                    "Microsoft Mark",
-                    "Microsoft Aria",
-                    "Microsoft Jenny",
-                    "Microsoft Guy"
-                },
-
-                "Azure Speech" => new List<string>
-                {
-                    "Phoebe",
-                    "Serena",
-                    "Onyx"
-                },
-
-                "Piper" => new List<string>
-                {
-                    "Joe"
-                },
-
-                _ => new List<string>()
-            };
+            var generator = VoiceOptions.GetAudioGenerator(value);
+            AvailableVoices = VoiceOptions.GetVoices(generator);
 
             SelectedVoice = AvailableVoices.Count > 0 ? AvailableVoices[0] : string.Empty;
-        }
-
-        private string GetVoiceName()
-        {
-            return SelectedVoice switch
-            {
-                var v when v.StartsWith("Phoebe", StringComparison.OrdinalIgnoreCase)
-                    => "en-US-Phoebe:DragonHDLatestNeural",
-                var v when v.StartsWith("Serena", StringComparison.OrdinalIgnoreCase)
-                    => "en-US-Serena:DragonHDLatestNeural",
-                var v when v.StartsWith("Onyx", StringComparison.OrdinalIgnoreCase)
-                    => "en-US-OnyxTurboMultilingualNeural",
-                var v when v.StartsWith("Joe", StringComparison.OrdinalIgnoreCase)
-                    => "en_US-joe-medium",
-                _ => SelectedVoice
-            };
-        }
-
-        private AudioGenerator GetGeneratorName()
-        {
-            return SelectedVoiceGenerator switch
-            {
-                "Windows Narrator" => AudioGenerator.WindowsNarrator,
-                "Azure Speech" => AudioGenerator.AzureSpeech,
-                "Piper" => AudioGenerator.Piper,
-                _ => AudioGenerator.WindowsNarrator
-            };
         }
 
         private void SaveSettings()
@@ -147,8 +97,8 @@ namespace SpeechRelay.Client.ViewModels
                 var request = new SpeechRequest
                 {
                     Text = msg,
-                    Voice = GetVoiceName(),
-                    Generator = GetGeneratorName()
+                    Voice = VoiceOptions.GetVoiceName(SelectedVoice),
+                    Generator = VoiceOptions.GetAudioGenerator(SelectedVoiceGenerator)
                 };
                 var response = await _http.PostAsJsonAsync(url, request, SpeechRelayJson.Options);
                 ServerResponse = await response.Content.ReadAsStringAsync();
