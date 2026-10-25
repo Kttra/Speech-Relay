@@ -61,12 +61,12 @@ namespace SpeechRelay.Host.ViewModels
 
             _webServer.TextReceived += text =>
             {
-                LastText = $"{SelectedVoiceGenerator} [{SelectedVoice}]: {text}";
+                SetLastText(text);
             };
 
             SubmitCommand = new RelayCommand(async () =>
             {
-                LastText = $"{SelectedVoiceGenerator} [{SelectedVoice}]: {InputText}";
+                SetLastText(InputText);
                 var audio = await _webServer.ProcessVoice(InputText, VoiceOptions.GetVoiceName(SelectedVoice), VoiceOptions.GetAudioGenerator(SelectedVoiceGenerator));
                 InputText = "";
             });
@@ -106,7 +106,7 @@ namespace SpeechRelay.Host.ViewModels
             PairingQrCode = new Bitmap(stream);
         }
 
-        public void UpdateText(string text)
+        private void SetLastText(string text)
         {
             LastText = $"{text} (Voice: {SelectedVoice}, Generator: {SelectedVoiceGenerator})";
         }

@@ -49,12 +49,12 @@ namespace SpeechRelay.Client.ViewModels
             var defaultPcIp = config["Api:DefaultPcIp"] ?? "";
             PcIp = string.IsNullOrEmpty(_settings.PcIp) ? defaultPcIp : _settings.PcIp;
             SelectedVoiceGenerator = _settings.SelectedVoiceGenerator;
-            if (AvailableVoices.Contains(_settings.SelectedVoice))
+
+            OnSelectedVoiceGeneratorChanged(SelectedVoiceGenerator);
+            if (!string.IsNullOrEmpty(_settings.SelectedVoice) && AvailableVoices.Contains(_settings.SelectedVoice))
             {
                 SelectedVoice = _settings.SelectedVoice;
             }
-
-            OnSelectedVoiceGeneratorChanged(SelectedVoiceGenerator);
             IsAndroid = OperatingSystem.IsAndroid();
             AuthToken = string.IsNullOrEmpty(_settings.AuthToken) ? (config["Api:AuthToken"] ?? string.Empty) : _settings.AuthToken;
         }
@@ -63,20 +63,17 @@ namespace SpeechRelay.Client.ViewModels
         {
             var generator = VoiceOptions.GetAudioGenerator(value);
             AvailableVoices = VoiceOptions.GetVoices(generator);
-
-            SelectedVoice = AvailableVoices.Count > 0 ? AvailableVoices[0] : string.Empty;
+            SelectedVoice = !string.IsNullOrEmpty(SelectedVoice) && AvailableVoices.Contains(SelectedVoice)
+                ? SelectedVoice
+                : (AvailableVoices.Count > 0 ? AvailableVoices[0] : string.Empty);
         }
 
         private void SaveSettings()
         {
-            if (_settingsService == null || _settings == null)
-                return;
-
             _settings.PcIp = PcIp;
             _settings.SelectedVoice = SelectedVoice;
             _settings.SelectedVoiceGenerator = SelectedVoiceGenerator;
             _settings.AuthToken = AuthToken ?? string.Empty;
-
             _settingsService.Save(_settings);
         }
 
