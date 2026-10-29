@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using SpeechRelay.Shared.Constants;
 using SpeechRelay.Shared.Models;
 using System;
 using System.Diagnostics;
@@ -30,7 +31,7 @@ public class WebServer : IWebServer
         Task.Run(() =>
         {
             var listener = new HttpListener();
-            listener.Prefixes.Add("http://*:5000/speak/");
+            listener.Prefixes.Add($"http://*:{SpeechRelayNetwork.DefaultPort}{SpeechRelayNetwork.SpeakRoute}");
             listener.Start();
 
             while (true)

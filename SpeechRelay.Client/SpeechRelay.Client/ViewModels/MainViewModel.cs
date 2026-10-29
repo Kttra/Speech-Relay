@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Configuration;
 using SpeechRelay.Client.Services;
+using SpeechRelay.Shared.Constants;
 using SpeechRelay.Shared.Models;
 using SpeechRelay.Shared.Services;
 using System;
@@ -90,7 +91,7 @@ namespace SpeechRelay.Client.ViewModels
                     return;
                 }
 
-                var url = $"http://{PcIp}:5000/speak/";
+                var url = $"http://{PcIp}:{SpeechRelayNetwork.DefaultPort}{SpeechRelayNetwork.SpeakRoute}";
                 var request = new SpeechRequest
                 {
                     Text = msg,
