@@ -37,10 +37,10 @@ Open **Command Prompt as Administrator** and run:
 netsh http add urlacl url=http://*:53317/speak/ user=Everyone
 ```
 
-Next, allow incoming connections through Windows Firewall:
+Next, allow incoming connections through Windows Firewall. Adjust the rule according to your network configuration and security requirements. The following command allows connections to Speech Relay on TCP port 53317 from devices on your local subnet:
 
 ```cmd
-netsh advfirewall firewall add rule name="Speech Relay 53317" dir=in action=allow protocol=TCP localport=53317
+netsh advfirewall firewall add rule name="Speech Relay 53317" dir=in action=allow protocol=TCP localport=53317 remoteip=localsubnet
 ```
 
 **Security Note:** These commands allow the application to listen for requests on port 53317. They do not configure internet port forwarding, but they can make the service accessible to other devices that can reach your PC. Speech Relay is intended for use on trusted local networks. Requests require the configured authentication token.
