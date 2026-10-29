@@ -29,21 +29,21 @@ A few things distinguish it from a typical TTS application:
 
 Speech Relay Desktop uses `HttpListener` to receive HTTP requests from the mobile application over your local network.
 
-Windows may require a URL reservation before the application can listen on port `5000`.
+Windows may require a URL reservation before the application can listen on port `53317`.
 
 Open **Command Prompt as Administrator** and run:
 
 ```cmd
-netsh http add urlacl url=http://*:5000/speak/ user=Everyone
+netsh http add urlacl url=http://*:53317/speak/ user=Everyone
 ```
 
 Next, allow incoming connections through Windows Firewall:
 
 ```cmd
-netsh advfirewall firewall add rule name="Speech Relay 5000" dir=in action=allow protocol=TCP localport=5000
+netsh advfirewall firewall add rule name="Speech Relay 53317" dir=in action=allow protocol=TCP localport=53317
 ```
 
-**Security Note:** These commands allow the application to listen for requests on port 5000. They do not configure internet port forwarding, but they can make the service accessible to other devices that can reach your PC. Speech Relay is intended for use on trusted local networks. Requests require the configured authentication token.
+**Security Note:** These commands allow the application to listen for requests on port 53317. They do not configure internet port forwarding, but they can make the service accessible to other devices that can reach your PC. Speech Relay is intended for use on trusted local networks. Requests require the configured authentication token.
 
 ### 2. How to Use
 1. Launch Speech Relay Desktop.
@@ -100,11 +100,11 @@ The following steps are for when you no longer want to use this application and 
 Open **Command Prompt as Administrator** and run:
 
 ```cmd
-netsh http delete urlacl url=http://*:5000/speak/
+netsh http delete urlacl url=http://*:53317/speak/
 ```
 
 ```cmd
-netsh advfirewall firewall delete rule name="Speech Relay 5000"
+netsh advfirewall firewall delete rule name="Speech Relay 53317"
 ```
 
 These commands remove the URL reservation and firewall rule created during setup.

@@ -1,10 +1,11 @@
 ﻿using QRCoder;
+using SpeechRelay.Shared.Constants;
 using SpeechRelay.Shared.Models;
 using System.Text.Json;
 
 public class PairingQrCodeService : IPairingQrCodeService
 {
-    public byte[] Generate(string ipAddress, string token, int? port = 5000)
+    public byte[] Generate(string ipAddress, string token, int? port = SpeechRelayNetwork.DefaultPort)
     {
         var payloadObj = new PairingPayload
         {
