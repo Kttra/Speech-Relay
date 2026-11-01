@@ -108,7 +108,6 @@ public class WebServer : IWebServer
 
             if (!string.IsNullOrWhiteSpace(text))
             {
-                displayVoice = VoiceOptions.GetVoiceName(displayVoice);
                 Write(ctx, $"Received: {text} ({generator} - {displayVoice})");
 
                 var voice = VoiceOptions.GetVoiceName(displayVoice);
