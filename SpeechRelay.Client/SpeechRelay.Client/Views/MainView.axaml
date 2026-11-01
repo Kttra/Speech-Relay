@@ -115,6 +115,7 @@
             <TextBlock Text="{Binding ServerResponse}"
                 TextWrapping="Wrap"
                 HorizontalAlignment="Stretch"
+                MaxWidth="350"
                 Margin="5,10,5,5" />
        </StackPanel>
     </ScrollViewer>

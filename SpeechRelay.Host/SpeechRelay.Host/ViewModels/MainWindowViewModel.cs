@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Configuration;
 using SpeechRelay.Host.Services;
+using SpeechRelay.Shared.Models;
 using SpeechRelay.Shared.Services;
 using System;
 using System.Collections.Generic;
@@ -59,15 +60,16 @@ namespace SpeechRelay.Host.ViewModels
             ListeningIp = GetWifiIp();
             UpdatePairingQrCode();
 
-            _webServer.TextReceived += text =>
+            _webServer.TextReceived += (text, voice, audioGenerator) =>
             {
-                SetLastText(text);
+                SetLastText(text, voice, audioGenerator);
             };
 
             SubmitCommand = new RelayCommand(async () =>
             {
-                SetLastText(InputText);
-                var audio = await _webServer.ProcessVoice(InputText, VoiceOptions.GetVoiceName(SelectedVoice), VoiceOptions.GetAudioGenerator(SelectedVoiceGenerator));
+                var voiceGenerator = VoiceOptions.GetAudioGenerator(SelectedVoiceGenerator);
+                SetLastText(InputText, SelectedVoice, voiceGenerator);
+                var audio = await _webServer.ProcessVoice(InputText, VoiceOptions.GetVoiceName(SelectedVoice), voiceGenerator);
                 InputText = "";
             });
 
@@ -106,9 +108,9 @@ namespace SpeechRelay.Host.ViewModels
             PairingQrCode = new Bitmap(stream);
         }
 
-        private void SetLastText(string text)
+        private void SetLastText(string text, string voice, AudioGenerator generator)
         {
-            LastText = $"{text} (Voice: {SelectedVoice}, Generator: {SelectedVoiceGenerator})";
+            LastText = $"{text} (Voice: {voice}, Generator: {generator})";
         }
 
         // May need to use a different method to get the IP address in the future, as this method may not work in all environments

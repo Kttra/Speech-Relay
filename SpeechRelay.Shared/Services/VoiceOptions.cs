@@ -65,7 +65,7 @@ namespace SpeechRelay.Shared.Services
                 var v when v.StartsWith("Onyx", System.StringComparison.OrdinalIgnoreCase) => "en-US-OnyxTurboMultilingualNeural",
 
                 //Piper voices
-                var v when v.StartsWith("Joe", System.StringComparison.OrdinalIgnoreCase) => "en_US-joe-medium",
+                var v when v.StartsWith("Joe", System.StringComparison.OrdinalIgnoreCase) => "en_US-joe-medium.onnx",
 
                 //Other voices
                 _ => voice
