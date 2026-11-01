@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using SpeechRelay.Shared.Constants;
 using SpeechRelay.Shared.Models;
+using SpeechRelay.Shared.Services;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -18,7 +19,7 @@ namespace SpeechRelay.Host.Services;
 
 public class WebServer : IWebServer
 {
-    public event Action<string>? TextReceived;
+    public event Action<string, string, AudioGenerator>? TextReceived;
     private readonly IConfiguration _config;
 
     public WebServer(IConfiguration config)
@@ -71,7 +72,7 @@ public class WebServer : IWebServer
             }
 
             var text = "";
-            var voice = "en-US-OnyxTurboMultilingualNeural";
+            var displayVoice = "Microsoft David";
             var generator = AudioGenerator.WindowsNarrator;
 
             if (ctx.Request.HttpMethod == "POST")
@@ -89,7 +90,7 @@ public class WebServer : IWebServer
                     }
 
                     text = request.Text ?? "";
-                    voice = string.IsNullOrEmpty(request.Voice) ? voice : request.Voice;
+                    displayVoice = string.IsNullOrEmpty(request.Voice) ? displayVoice : request.Voice;
                     generator = request.Generator;
                 }
                 catch (JsonException)
@@ -103,12 +104,14 @@ public class WebServer : IWebServer
                 text = ctx.Request.QueryString["text"] ?? "";
             }
 
-            TextReceived?.Invoke(text);
+            TextReceived?.Invoke(text, displayVoice, generator);
 
             if (!string.IsNullOrWhiteSpace(text))
             {
+                Write(ctx, $"Received: {text} ({generator} - {displayVoice})");
+
+                var voice = VoiceOptions.GetVoiceName(displayVoice);
                 await ProcessVoice(text, voice, generator);
-                Write(ctx, $"Received: {text}");
             }
             else
             {
@@ -128,7 +131,7 @@ public class WebServer : IWebServer
         switch (audioGenerator)
         {
             case AudioGenerator.Piper:
-                audio = await PiperSpeakAsync(text);
+                audio = await PiperSpeakAsync(text, voice);
                 break;
             case AudioGenerator.AzureSpeech:
                 audio = await AzureSpeakAsync(text, voice);

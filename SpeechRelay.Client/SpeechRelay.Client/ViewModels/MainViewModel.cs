@@ -95,7 +95,7 @@ namespace SpeechRelay.Client.ViewModels
                 var request = new SpeechRequest
                 {
                     Text = msg,
-                    Voice = VoiceOptions.GetVoiceName(SelectedVoice),
+                    Voice = SelectedVoice,
                     Generator = VoiceOptions.GetAudioGenerator(SelectedVoiceGenerator)
                 };
                 var response = await _http.PostAsJsonAsync(url, request, SpeechRelayJson.Options);
